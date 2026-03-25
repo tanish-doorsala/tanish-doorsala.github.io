@@ -204,10 +204,13 @@ footer { padding: 24px 56px; border-top: 1px solid var(--border); display: flex;
   .photo-strip.cols-3, .photo-strip.cols-4 { grid-template-columns: 1fr 1fr; }
   .photo-cell { height: 200px; }
   .num-grid { grid-template-columns: 1fr 1fr; }
+  .num-cell { padding: 28px 24px; }
   .num-cell:nth-child(2) { border-right: none; }
   .num-cell:nth-child(3) { border-right: 1px solid var(--border); border-top: 1px solid var(--border); }
   .num-cell:nth-child(4) { border-top: 1px solid var(--border); }
+  .num-val { font-size: 48px; }
   .about-wrap { grid-template-columns: 1fr; gap: 56px; }
   .contact-section { padding: 72px 24px; }
   footer { padding: 20px 24px; flex-direction: column; gap: 8px; text-align: center; }
+  .osc-wrapper { display: none; }
 }
