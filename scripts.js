@@ -172,6 +172,10 @@ document.querySelectorAll('.fade-up').forEach(el => {
   let activeChannel = 0;
   let t = 0;
 
+  // Cached dimensions — updated only on resize, not every frame
+  let oscW = 0;
+  const oscH = 160;
+
   const channels = [
     { fn: t => { const base = 0.55 + 0.18 * Math.sin(t * 0.8), noise = 0.018 * (Math.random() - 0.5), bump = 0.12 * Math.max(0, Math.sin(t * 2.1)) * (Math.sin(t * 0.3) > 0.2 ? 1 : 0); return Math.max(0.05, Math.min(0.95, base + noise + bump)); }},
     { fn: t => { const sweep = 0.5 + 0.32 * Math.sin(t * 0.45 + 0.8), correction = 0.08 * Math.sin(t * 4.2) * Math.exp(-((t % 3.5) * 0.8)), noise = 0.012 * (Math.random() - 0.5); return Math.max(0.05, Math.min(0.95, sweep + correction + noise)); }},
@@ -182,15 +186,19 @@ document.querySelectorAll('.fade-up').forEach(el => {
   const buffers = channels.map(() => new Array(POINTS).fill(0.5));
   const labels = ['Throttle', 'Steering', 'Suspension'];
 
-  function resize() {
-    const W = canvas.offsetWidth, H = 160;
-    canvas.width = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  // Resize only updates canvas size — called on load + window resize only
+  function resizeOsc() {
+    oscW = canvas.offsetWidth;
+    canvas.width  = oscW * dpr;
+    canvas.height = oscH * dpr;
+    canvas.style.width  = oscW + 'px';
+    canvas.style.height = oscH + 'px';
     ctx.scale(dpr, dpr);
   }
 
   function draw() {
-    const W = canvas.offsetWidth, H = 160;
+    const W = oscW, H = oscH;
+    if (!W) return;
     ctx.clearRect(0, 0, W, H);
 
     // Grid
@@ -226,7 +234,8 @@ document.querySelectorAll('.fade-up').forEach(el => {
   function tick() {
     t += 0.025;
     channels.forEach((ch, i) => { buffers[i].shift(); buffers[i].push(ch.fn(t)); });
-    resize(); draw(); requestAnimationFrame(tick);
+    draw();
+    requestAnimationFrame(tick);
   }
 
   // Channel switcher buttons
@@ -238,7 +247,9 @@ document.querySelectorAll('.fade-up').forEach(el => {
     });
   });
 
-  resize(); window.addEventListener('resize', resize); tick();
+  resizeOsc();
+  window.addEventListener('resize', resizeOsc);
+  tick();
 })();
 
 
