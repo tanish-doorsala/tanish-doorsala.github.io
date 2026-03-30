@@ -247,9 +247,33 @@ document.querySelectorAll('.fade-up').forEach(el => {
     });
   });
 
+  let oscRunning = false;
+  let oscRaf = null;
+
+  function tick() {
+    if (!oscRunning) return;
+    t += 0.025;
+    channels.forEach((ch, i) => { buffers[i].shift(); buffers[i].push(ch.fn(t)); });
+    draw();
+    oscRaf = requestAnimationFrame(tick);
+  }
+
+  // Only run the loop while the oscilloscope is actually on screen
+  const oscObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !oscRunning) {
+        oscRunning = true;
+        tick();
+      } else if (!e.isIntersecting && oscRunning) {
+        oscRunning = false;
+        cancelAnimationFrame(oscRaf);
+      }
+    });
+  }, { threshold: 0.01 });
+
+  oscObserver.observe(canvas);
   resizeOsc();
   window.addEventListener('resize', resizeOsc);
-  tick();
 })();
 
 
